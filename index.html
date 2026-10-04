@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pitline — автосервис</title>
 <meta name="description" content="Автосервис Pitline: компьютерная диагностика, ТО по регламенту, ремонт двигателя и ходовой. Фотоотчёт по каждой детали в Telegram.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23B8FF3C'/%3E%3Crect x='12' y='8' width='8' height='16' rx='2' fill='%230A0B0D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tektur:wdth,wght@75..100,400..900&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -63,13 +64,28 @@ section{padding:128px 0;scroll-margin-top:68px}
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;
   -webkit-mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%);mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%)}
 .hero .wrap{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center;position:relative;z-index:1}
-.hero h1{font-size:clamp(2.7rem,6.2vw,5.4rem);margin:24px 0 24px}
+/* Потолок 4.8rem, а не больше: при 5.4 заголовок ломался на четыре строки
+   и доказательство у кнопки уезжало за первый экран ноутбука 1366x768. */
+.hero h1{font-size:clamp(2.7rem,6.2vw,4.8rem);margin:24px 0 24px}
 .hero h1 em{font-style:normal;color:var(--acc);text-shadow:0 0 28px rgba(184,255,60,.45)}
 .hero .lead-in{font-size:19px}
-.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin:36px 0 48px}
+/* Плашка над заголовком: стаж — первое, что проверяет человек, отдающий
+   машину незнакомым. В герое она вместо обычного kicker. */
+.trust{display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 12px;border:1px solid var(--line2);border-radius:999px;
+  background:rgba(17,19,23,.72);font:400 14px/1.2 var(--body);color:var(--muted)}
+.trust svg{width:16px;height:16px;flex:none;color:var(--acc)}
+.trust b{color:var(--text);font-weight:600}
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:36px 0 48px}
+/* Доказательство прямо у кнопки, а не в отдельном блоке ниже: сомнение
+   возникает в момент нажатия, там его и закрываем. */
+/* Отдельной строкой: рядом с двумя кнопками в колонке героя не помещается
+   ни на одной ширине, а полупереносом выглядит как сломанная вёрстка. */
+.proof{flex-basis:100%;display:flex;flex-direction:column;gap:4px;padding:2px 0 2px 16px;margin-top:4px;border-left:2px solid var(--acc)}
+.proof b{font:600 15px/1.2 var(--mono);color:var(--text)}
+.proof span{font-size:13px;line-height:1.3;color:var(--muted)}
 .facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
 .facts div{padding:20px 16px 0 0}
-.facts b{display:block;font:600 22px/1.2 var(--mono);color:var(--text)}
+.facts b{display:block;font:400 clamp(26px,2.6vw,34px)/1.1 var(--mono);letter-spacing:-.02em;color:var(--text)}
 .facts span{font-size:14px;color:var(--muted);line-height:1.4;display:block;margin-top:6px}
 
 /* монитор */
@@ -127,10 +143,14 @@ section{padding:128px 0;scroll-margin-top:68px}
 .chat-top b{display:block;font-size:15px}
 .chat-top small{color:var(--muted);font-size:13px}
 .msg{background:#182533;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:15px;line-height:1.5;margin-bottom:10px}
-.photo{height:150px;border-radius:10px;margin:2px 0 10px;position:relative;overflow:hidden;
-  background:radial-gradient(circle at 35% 45%,#3a3f47 0 18%,#24282e 19% 30%,#1a1d22 31%),linear-gradient(135deg,#2a2e35,#15181c)}
-.photo::after{content:"износ 0,4 мм";position:absolute;left:52%;top:30%;font:600 12px/1 var(--mono);color:var(--err);padding:6px 8px;border:1px solid var(--err);border-radius:6px;background:rgba(10,11,13,.6)}
-.photo::before{content:"";position:absolute;left:34%;top:40%;width:60px;height:2px;background:var(--err);transform:rotate(-25deg);transform-origin:left}
+/* 4:3 целиком, без обрезки: Telegram так и показывает присланное фото.
+   Координаты кольца привязаны к этому кадру (электрод около 46% / 42%) —
+   при замене снимка их надо переставить. */
+.photo{position:relative;margin:2px 0 10px;border-radius:10px;overflow:hidden;aspect-ratio:4/3;background:#1a1d22}
+.photo img{display:block;width:100%;height:100%;object-fit:cover}
+.photo .mark{position:absolute;left:46.5%;top:43%;width:17%;aspect-ratio:1;transform:translate(-50%,-50%);border:2px solid var(--err);border-radius:50%;
+  box-shadow:0 0 0 1px rgba(10,11,13,.5),0 0 16px rgba(255,90,78,.35)}
+.photo .tag{position:absolute;left:58%;top:22%;font:600 12px/1 var(--mono);color:var(--err);padding:6px 8px;border:1px solid var(--err);border-radius:6px;background:rgba(10,11,13,.72)}
 .msg .sum{font-family:var(--mono);color:var(--acc)}
 .chat-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .chat-btns span{text-align:center;padding:10px;border-radius:10px;background:#182533;font-size:14px;color:#6ab3f3}
@@ -260,12 +280,13 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 <section class="hero">
   <div class="wrap">
     <div>
-      <div class="kicker">Автосервис · Москва, Нагатинская</div>
+      <div class="trust"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 2.5 3.6v4c0 3.3 2.3 5.9 5.5 6.9 3.2-1 5.5-3.6 5.5-6.9v-4L8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m5.4 8 1.8 1.8 3.4-3.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>С 2014 года</b> · Москва, Нагатинская</span></div>
       <h1>Сначала находим <em>причину</em>. Потом чиним.</h1>
       <p class="lead-in">Не меняем детали «на всякий случай». Диагностика сканером и руками, смета до начала работ, фото и видео каждой снятой детали — вам в Telegram.</p>
       <div class="cta-row">
         <a class="btn" href="#contact">Записаться на диагностику</a>
         <a class="btn ghost" href="#calc">Рассчитать ТО</a>
+        <div class="proof"><b>0 работ без согласования</b><span>из 11&nbsp;400 машин с 2014 года</span></div>
       </div>
       <div class="facts">
         <div><b>0&nbsp;₽</b><span>диагностика, если ремонт у нас</span></div>
@@ -319,7 +340,10 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
     <div class="chat" aria-label="Пример сообщения со сметой в Telegram">
       <div class="chat-top"><div class="ava">P</div><div><b>Pitline · сервис</b><small>бот · сейчас</small></div></div>
       <div class="msg">Kia Rio, госномер …412. Нашли причину троения: пробита катушка зажигания 2-го цилиндра, свечи на пределе износа.</div>
-      <div class="photo" role="img" aria-label="Фото свечи с отмеченным износом электрода"></div>
+      <figure class="photo">
+        <img src="img/spark-plug.webp" width="880" height="657" loading="lazy" decoding="async" alt="Снятая свеча зажигания в руке механика, электрод в нагаре">
+        <span class="mark" aria-hidden="true"></span><span class="tag">износ 0,4&nbsp;мм</span>
+      </figure>
       <div class="msg">Катушка + 4 свечи, работа и запчасти: <span class="sum">6&nbsp;850&nbsp;₽</span><br>Готово сегодня к 18:00.</div>
       <div class="chat-btns"><span>Согласовать</span><span>Позвонить мастеру</span></div>
     </div>
@@ -414,7 +438,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 <footer class="site">
   <div class="wrap">
     <span>Pitline · автосервис</span>
-    <span>Демонстрационный сайт: компания, адрес и отзывы вымышлены.</span>
+    <span>Демонстрационный сайт: компания, адрес, цифры и отзывы вымышлены.</span>
   </div>
 </footer>
 
