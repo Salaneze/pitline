@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitline — автосервис</title>
+<meta name="description" content="Автосервис Pitline: компьютерная диагностика, ТО по регламенту, ремонт двигателя и ходовой. Фотоотчёт по каждой детали в Telegram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wdth,wght@75..100,400..900&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0B0D; --surface:#111317; --surface2:#16191E;
+  --line:rgba(237,239,242,.09); --line2:rgba(237,239,242,.16);
+  --text:#EDEFF2; --muted:#8E949D;
+  --acc:#B8FF3C; --acc-dim:rgba(184,255,60,.12); --err:#FF5A4E;
+  --display:"Tektur",system-ui,sans-serif; --body:"Onest",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --wrap:1200px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:4px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.kicker{font:600 13px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc)}
+h1,h2,h3{font-family:var(--display);font-variation-settings:"wdth" 82;line-height:1.05;letter-spacing:-.02em;font-weight:800}
+h2{font-size:clamp(2rem,4.2vw,3.4rem);margin:20px 0 16px}
+.lead-in{color:var(--muted);max-width:60ch;font-size:18px}
+section{padding:128px 0;scroll-margin-top:68px}
+
+/* кнопки */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:12px;border:0;cursor:pointer;
+  background:var(--acc);color:var(--bg);font:600 16px/1 var(--body);
+  box-shadow:0 0 0 1px rgba(184,255,60,.5),0 8px 32px -8px rgba(184,255,60,.55);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(184,255,60,.7),0 12px 40px -6px rgba(184,255,60,.7)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--acc);color:var(--acc)}
+
+/* шапка */
+.nav{position:sticky;top:0;z-index:20;background:rgba(10,11,13,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.logo{font:900 22px/1 var(--display);font-variation-settings:"wdth" 75;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.logo i{width:22px;height:22px;border-radius:6px;background:var(--acc);box-shadow:0 0 18px rgba(184,255,60,.6);position:relative}
+.logo i::after{content:"";position:absolute;inset:6px 9px;background:var(--bg);border-radius:2px}
+.nav-links{display:flex;gap:28px;color:var(--muted);font-size:15px}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:18px}
+.phone{font:600 15px/1 var(--mono)}
+.nav .btn{min-height:42px;padding:0 18px;font-size:15px}
+
+/* герой */
+.hero{padding:72px 0 112px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;right:-10%;top:-10%;width:60vw;height:60vw;max-width:820px;max-height:820px;
+  background:radial-gradient(closest-side,rgba(184,255,60,.13),transparent 70%);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%);mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%)}
+.hero .wrap{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center;position:relative;z-index:1}
+.hero h1{font-size:clamp(2.7rem,6.2vw,5.4rem);margin:24px 0 24px}
+.hero h1 em{font-style:normal;color:var(--acc);text-shadow:0 0 28px rgba(184,255,60,.45)}
+.hero .lead-in{font-size:19px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin:36px 0 48px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.facts div{padding:20px 16px 0 0}
+.facts b{display:block;font:600 22px/1.2 var(--mono);color:var(--text)}
+.facts span{font-size:14px;color:var(--muted);line-height:1.4;display:block;margin-top:6px}
+
+/* монитор */
+.monitor{background:linear-gradient(180deg,rgba(22,25,30,.92),rgba(14,16,19,.92));border:1px solid var(--line2);border-radius:20px;padding:22px;
+  box-shadow:0 0 0 1px rgba(184,255,60,.05),0 40px 80px -30px rgba(0,0,0,.8),0 0 60px -20px rgba(184,255,60,.25);font-family:var(--mono)}
+.mon-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);letter-spacing:.06em;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.live{display:flex;align-items:center;gap:8px;color:var(--acc)}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0}
+.gauge{background:var(--surface);padding:14px 16px}
+.gauge small{display:block;font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.gauge b{display:block;font-size:26px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.gauge b u{text-decoration:none;font-size:13px;color:var(--muted);font-weight:400;margin-left:4px}
+.gauge.warn b{color:var(--err)}
+.bar{height:3px;background:var(--line);border-radius:2px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);width:40%;transition:width .5s var(--ease)}
+.gauge.warn .bar i{background:var(--err)}
+.systems{list-style:none;font-size:13px}
+.systems li{display:flex;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px dashed var(--line);color:var(--muted)}
+.systems li:last-child{border-bottom:0}
+.systems li .st{min-width:64px;text-align:right}
+.systems li.scan{color:var(--text)}
+.systems li.scan .st{color:var(--acc)}
+.systems li.ok .st{color:var(--acc)}
+.systems li.bad{color:var(--text)}
+.systems li.bad .st{color:var(--err);font-weight:600}
+.verdict{margin-top:14px;padding:14px 16px;border-radius:12px;background:rgba(255,90,78,.08);border:1px solid rgba(255,90,78,.3);font-size:13px;line-height:1.55;min-height:72px;
+  opacity:0;transform:translateY(6px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.verdict.on{opacity:1;transform:none}
+.verdict b{color:var(--err)}
+.verdict .price{color:var(--acc)}
+
+/* услуги */
+.svc-list{margin-top:56px;border-top:1px solid var(--line)}
+.svc{display:grid;grid-template-columns:72px 1.1fr 1.4fr 160px;gap:24px;align-items:baseline;padding:28px 0;border-bottom:1px solid var(--line);transition:background .25s var(--ease)}
+.svc:hover{background:linear-gradient(90deg,var(--acc-dim),transparent 60%)}
+.svc .code{font:600 13px/1 var(--mono);color:var(--muted)}
+.svc h3{font-size:clamp(1.3rem,2vw,1.6rem);font-weight:700}
+.svc p{color:var(--muted);font-size:15px;line-height:1.55}
+.svc .price{font:600 18px/1.2 var(--mono);text-align:right;white-space:nowrap}
+.svc .price small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:4px}
+
+/* обещание + шаги */
+.promise{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.promise .wrap{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.steps{list-style:none;margin-top:40px}
+.step{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}
+.step span{font:600 14px/1.6 var(--mono);color:var(--acc)}
+.step b{display:block;font-weight:600;font-size:18px;margin-bottom:4px}
+.step p{color:var(--muted);font-size:15px;line-height:1.55}
+.chat{background:#0E1621;border:1px solid var(--line2);border-radius:20px;padding:20px;max-width:440px;justify-self:end;width:100%;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+.chat-top{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:var(--bg);font:900 15px/1 var(--display)}
+.chat-top b{display:block;font-size:15px}
+.chat-top small{color:var(--muted);font-size:13px}
+.msg{background:#182533;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:15px;line-height:1.5;margin-bottom:10px}
+.photo{height:150px;border-radius:10px;margin:2px 0 10px;position:relative;overflow:hidden;
+  background:radial-gradient(circle at 35% 45%,#3a3f47 0 18%,#24282e 19% 30%,#1a1d22 31%),linear-gradient(135deg,#2a2e35,#15181c)}
+.photo::after{content:"износ 0,4 мм";position:absolute;left:52%;top:30%;font:600 12px/1 var(--mono);color:var(--err);padding:6px 8px;border:1px solid var(--err);border-radius:6px;background:rgba(10,11,13,.6)}
+.photo::before{content:"";position:absolute;left:34%;top:40%;width:60px;height:2px;background:var(--err);transform:rotate(-25deg);transform-origin:left}
+.msg .sum{font-family:var(--mono);color:var(--acc)}
+.chat-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chat-btns span{text-align:center;padding:10px;border-radius:10px;background:#182533;font-size:14px;color:#6ab3f3}
+
+/* калькулятор */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line2);border-radius:20px;overflow:hidden;margin-top:56px}
+.calc > div{background:var(--surface);padding:36px}
+.field-label{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:block}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:36px}
+.seg button{min-height:52px;border-radius:10px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:15px;text-align:left;padding:10px 14px;line-height:1.3;transition:border-color .2s var(--ease),background .2s var(--ease)}
+.seg button small{display:block;color:var(--muted);font-size:12px}
+.seg button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-dim)}
+.km{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.km b{font:600 34px/1 var(--mono);font-variant-numeric:tabular-nums}
+.km span{font:600 14px/1 var(--mono);color:var(--acc);padding:6px 10px;border-radius:8px;background:var(--acc-dim)}
+input[type=range]{width:100%;appearance:none;-webkit-appearance:none;height:44px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--acc) var(--p,0%),var(--line2) var(--p,0%))}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line2)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--acc)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--acc);margin-top:-9px;box-shadow:0 0 16px rgba(184,255,60,.7)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:var(--acc);box-shadow:0 0 16px rgba(184,255,60,.7)}
+.ticks{display:flex;justify-content:space-between;font:400 12px/1 var(--mono);color:var(--muted)}
+.works{list-style:none;font-size:15px;min-height:280px}
+.works li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line)}
+.works li span:last-child{font-family:var(--mono);white-space:nowrap}
+.works li.free span:last-child{color:var(--acc)}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0}
+.total small{color:var(--muted);font-size:14px}
+.total b{font:600 36px/1 var(--mono);color:var(--acc);text-shadow:0 0 24px rgba(184,255,60,.35);font-variant-numeric:tabular-nums}
+.calc .note{color:var(--muted);font-size:13px;margin-top:14px;line-height:1.5}
+
+/* отзывы */
+.revs{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px;margin-top:56px}
+.rev{border:1px solid var(--line);border-radius:16px;padding:28px;background:var(--surface);display:flex;flex-direction:column;gap:20px}
+.rev:first-child{background:linear-gradient(160deg,rgba(184,255,60,.08),var(--surface) 55%);border-color:rgba(184,255,60,.25)}
+.rev q{font-size:17px;line-height:1.6;quotes:none}
+.rev:first-child q{font-size:20px}
+.rev footer{margin-top:auto;font-size:14px;color:var(--muted)}
+.rev footer b{display:block;color:var(--text);font-weight:600}
+
+/* вопросы */
+.faq{max-width:840px;margin-top:40px}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:24px 40px 24px 0;font-size:19px;font-weight:600;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:4px;top:20px;font:400 26px/1 var(--mono);color:var(--acc);transition:transform .25s var(--ease)}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{color:var(--muted);padding:0 40px 24px 0;max-width:68ch}
+
+/* заявка */
+.contact .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:72px}
+.addr{margin-top:40px;display:grid;gap:22px}
+.addr div small{display:block;font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.addr div b{font-weight:500;font-size:18px}
+.lead{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:36px;display:grid;gap:18px;box-shadow:0 0 70px -30px rgba(184,255,60,.3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lead label{display:grid;gap:8px;font-size:14px;color:var(--muted)}
+.lead input[type=text],.lead input[type=tel],.lead textarea{width:100%;min-height:52px;padding:14px 16px;border-radius:10px;border:1px solid var(--line2);background:var(--bg);font-size:16px;transition:border-color .2s var(--ease)}
+.lead textarea{min-height:110px;resize:vertical}
+.lead input:focus,.lead textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-dim)}
+.lead .bad-input{border-color:var(--err)!important}
+.consent{display:flex!important;grid-template-columns:none;align-items:flex-start;gap:12px!important;font-size:13px!important;line-height:1.5;cursor:pointer}
+.consent input{width:20px;height:20px;accent-color:var(--acc);margin-top:1px;flex:none}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.lead .btn{width:100%;min-height:56px;font-size:17px}
+.lead .btn[disabled]{opacity:.6;cursor:wait}
+.form-msg{font-size:14px;min-height:21px;color:var(--err)}
+.done{display:none;text-align:center;padding:40px 8px}
+.done .ok{width:64px;height:64px;border-radius:50%;margin:0 auto 20px;display:grid;place-items:center;background:var(--acc-dim);border:1px solid var(--acc);color:var(--acc);font:600 28px/1 var(--mono);box-shadow:0 0 40px -6px rgba(184,255,60,.6)}
+.done h3{font-size:28px;margin-bottom:10px}
+.done p{color:var(--muted);max-width:42ch;margin:0 auto}
+.lead.sent > :not(.done){display:none}
+.lead.sent .done{display:block}
+
+footer.site{border-top:1px solid var(--line);padding:40px 0 56px;color:var(--muted);font-size:14px}
+footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+
+@media (max-width:980px){
+  .hero .wrap,.promise .wrap,.contact .wrap,.calc{grid-template-columns:1fr}
+  .chat{justify-self:start}
+  .revs{grid-template-columns:1fr}
+  .svc{grid-template-columns:56px 1fr;gap:8px 16px}
+  .svc p{grid-column:2}
+  .svc .price{grid-column:2;text-align:left}
+  .nav-links{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  section{padding:88px 0}
+  .wrap{padding:0 16px}
+  .hero{padding:40px 0 80px}
+  .facts{grid-template-columns:1fr 1fr}
+  .facts div:last-child{grid-column:1/-1}
+  .phone{display:none}
+  .calc > div,.lead{padding:24px 18px}
+  .row2,.seg{grid-template-columns:1fr}
+  .monitor{padding:16px}
+  .gauge b{font-size:22px}
+  .cta-row .btn{flex:1 1 100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Pitline, на главную"><i></i>PITLINE</a>
+    <nav class="nav-links" aria-label="Разделы">
+      <a href="#services">Услуги</a>
+      <a href="#how">Как работаем</a>
+      <a href="#calc">Расчёт ТО</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="nav-right">
+      <a class="phone" href="tel:+74950000000">+7 495 000-00-00</a>
+      <a class="btn" href="#contact">Записаться</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="kicker">Автосервис · Москва, Нагатинская</div>
+      <h1>Сначала находим <em>причину</em>. Потом чиним.</h1>
+      <p class="lead-in">Не меняем детали «на всякий случай». Диагностика сканером и руками, смета до начала работ, фото и видео каждой снятой детали — вам в Telegram.</p>
+      <div class="cta-row">
+        <a class="btn" href="#contact">Записаться на диагностику</a>
+        <a class="btn ghost" href="#calc">Рассчитать ТО</a>
+      </div>
+      <div class="facts">
+        <div><b>0&nbsp;₽</b><span>диагностика, если ремонт у нас</span></div>
+        <div><b>12&nbsp;мес</b><span>гарантия на работу и запчасти</span></div>
+        <div><b>6&nbsp;постов</b><span>принимаем в день обращения</span></div>
+      </div>
+    </div>
+
+    <div class="monitor" aria-label="Пример отчёта компьютерной диагностики">
+      <div class="mon-head"><span>DIAG · KIA RIO · 2019 · 87&nbsp;412 км</span><span class="live">LIVE</span></div>
+      <div class="gauges">
+        <div class="gauge" id="g-rpm"><small>Обороты ХХ</small><b><span>780</span><u>об/мин</u></b><div class="bar"><i></i></div></div>
+        <div class="gauge" id="g-volt"><small>Бортсеть</small><b><span>14.2</span><u>В</u></b><div class="bar"><i></i></div></div>
+        <div class="gauge" id="g-temp"><small>Антифриз</small><b><span>89</span><u>°C</u></b><div class="bar"><i></i></div></div>
+        <div class="gauge" id="g-fuel"><small>Топл. коррекция</small><b><span>+3.1</span><u>%</u></b><div class="bar"><i></i></div></div>
+      </div>
+      <ul class="systems" id="systems" aria-live="polite"></ul>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="kicker">Услуги и цены</div>
+    <h2>Цена называется до начала работ</h2>
+    <p class="lead-in">Ниже — цены за работу. Запчасти можно привезти свои или взять у нас: дадим два варианта, оригинал и проверенный аналог.</p>
+    <div class="svc-list">
+      <div class="svc"><span class="code">D-01</span><h3>Компьютерная диагностика</h3><p>Считываем ошибки всех блоков, смотрим живые параметры, проверяем руками то, что сканер не видит.</p><div class="price">1&nbsp;900&nbsp;₽<small>0&nbsp;₽ при ремонте</small></div></div>
+      <div class="svc"><span class="code">M-02</span><h3>ТО по регламенту</h3><p>Масло, фильтры, жидкости по пробегу и требованиям производителя. Отметка в сервисной книжке.</p><div class="price">от 2&nbsp;400&nbsp;₽<small>зависит от пробега</small></div></div>
+      <div class="svc"><span class="code">E-03</span><h3>Ремонт двигателя</h3><p>Пропуски зажигания, расход масла, ГРМ, течи. От замены катушки до капитального ремонта.</p><div class="price">от 3&nbsp;400&nbsp;₽</div></div>
+      <div class="svc"><span class="code">S-04</span><h3>Подвеска и тормоза</h3><p>Стуки, увод в сторону, вибрация при торможении. Колодки, диски, рычаги, стойки, развал-схождение.</p><div class="price">от 1&nbsp;500&nbsp;₽</div></div>
+      <div class="svc"><span class="code">T-05</span><h3>Коробка передач</h3><p>Замена масла в АКПП и вариаторе, адаптация, диагностика рывков и пробуксовки.</p><div class="price">от 4&nbsp;500&nbsp;₽</div></div>
+      <div class="svc"><span class="code">C-06</span><h3>Кондиционер</h3><p>Заправка, поиск утечки ультрафиолетом, антибактериальная обработка испарителя.</p><div class="price">от 2&nbsp;900&nbsp;₽</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="promise" id="how">
+  <div class="wrap">
+    <div>
+      <div class="kicker">Как работаем</div>
+      <h2>Ничего не меняем без вашего «да»</h2>
+      <ol class="steps">
+        <li class="step"><span>01</span><div><b>Заявка</b><p>Оставляете заявку на сайте или звоните. Перезваниваем за 15 минут и ставим время.</p></div></li>
+        <li class="step"><span>02</span><div><b>Диагностика</b><p>Мастер проверяет машину при вас или без вас — как удобнее.</p></div></li>
+        <li class="step"><span>03</span><div><b>Смета в Telegram</b><p>Фото проблемных деталей, цена работы и запчастей. Подтверждаете кнопкой.</p></div></li>
+        <li class="step"><span>04</span><div><b>Ремонт и выдача</b><p>Старые детали отдаём вам. Гарантия 12 месяцев, заказ-наряд на руки.</p></div></li>
+      </ol>
+    </div>
+    <div class="chat" aria-label="Пример сообщения со сметой в Telegram">
+      <div class="chat-top"><div class="ava">P</div><div><b>Pitline · сервис</b><small>бот · сейчас</small></div></div>
+      <div class="msg">Kia Rio, госномер …412. Нашли причину троения: пробита катушка зажигания 2-го цилиндра, свечи на пределе износа.</div>
+      <div class="photo" role="img" aria-label="Фото свечи с отмеченным износом электрода"></div>
+      <div class="msg">Катушка + 4 свечи, работа и запчасти: <span class="sum">6&nbsp;850&nbsp;₽</span><br>Готово сегодня к 18:00.</div>
+      <div class="chat-btns"><span>Согласовать</span><span>Позвонить мастеру</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="calc">
+  <div class="wrap">
+    <div class="kicker">Калькулятор</div>
+    <h2>Сколько стоит ваше ТО</h2>
+    <p class="lead-in">Выберите класс машины и пробег — покажем работы по регламенту и ориентир по цене.</p>
+    <div class="calc">
+      <div>
+        <span class="field-label" id="cls-label">Класс автомобиля</span>
+        <div class="seg" role="group" aria-labelledby="cls-label" id="classes"></div>
+        <span class="field-label" id="km-label">Пробег</span>
+        <div class="km"><b id="km-out">60 000 км</b><span id="to-out">ТО-4</span></div>
+        <input type="range" id="km" min="15000" max="180000" step="15000" value="60000" aria-labelledby="km-label">
+        <div class="ticks"><span>15 тыс.</span><span>90 тыс.</span><span>180 тыс.</span></div>
+      </div>
+      <div>
+        <span class="field-label">Что входит</span>
+        <ul class="works" id="works" aria-live="polite"></ul>
+        <div class="total"><small>Ориентир, работа + расходники</small><b id="total">0 ₽</b></div>
+        <a class="btn" href="#contact" id="calc-cta" style="width:100%">Записаться на ТО-4</a>
+        <p class="note">Точную цену назовём после осмотра: она зависит от двигателя и стоимости запчастей на день записи.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Отзывы</div>
+    <h2>Что говорят клиенты</h2>
+    <div class="revs">
+      <article class="rev"><q>В другом сервисе сказали менять коробку за 180 тысяч. Здесь нашли датчик за 3 400. Прислали фото, объяснили по-человечески. Езжу полгода — всё ровно.</q><footer><b>Андрей</b>Skoda Octavia, 2017</footer></article>
+      <article class="rev"><q>Оставила заявку вечером, утром уже стояла на подъёмнике. Смету согласовала из офиса одной кнопкой.</q><footer><b>Марина</b>Hyundai Creta, 2021</footer></article>
+      <article class="rev"><q>Вернули старые колодки в пакете. Мелочь, а доверия сразу больше.</q><footer><b>Илья</b>Toyota Camry, 2015</footer></article>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="kicker">Вопросы</div>
+    <h2>Частые вопросы</h2>
+    <div class="faq">
+      <details><summary>Можно приехать со своими запчастями?</summary><p>Да. Гарантию на работу даём в любом случае, на сами детали — только если они куплены у нас.</p></details>
+      <details><summary>Сохранится ли гарантия дилера?</summary><p>Да. Работаем по регламенту производителя, ставим запчасти с допуском и делаем отметку в сервисной книжке — по закону этого достаточно.</p></details>
+      <details><summary>Сколько ждать?</summary><p>Диагностика — 30-60 минут. ТО — 1,5-2 часа, можно подождать в зоне отдыха. Сроки ремонта называем в смете.</p></details>
+      <details><summary>Что если найдёте ещё что-то в процессе?</summary><p>Остановимся и пришлём фото в Telegram. Без вашего подтверждения сумма в смете не меняется.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div>
+      <div class="kicker">Запись</div>
+      <h2>Оставьте заявку — перезвоним за 15 минут</h2>
+      <p class="lead-in">Опишите, что беспокоит. Если не знаете, как назвать, — напишите как есть: «стучит справа на кочках» нам понятнее любого термина.</p>
+      <div class="addr">
+        <div><small>Адрес</small><b>Москва, Нагатинская ул., 00, бокс 4</b></div>
+        <div><small>Часы работы</small><b>Ежедневно, 9:00-21:00</b></div>
+        <div><small>Телефон</small><b class="mono">+7 495 000-00-00</b></div>
+      </div>
+    </div>
+
+    <form class="lead" id="lead" novalidate>
+      <div class="row2">
+        <label>Имя<input type="text" name="name" autocomplete="given-name" maxlength="60" required></label>
+        <label>Телефон<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required></label>
+      </div>
+      <label>Автомобиль<input type="text" name="car" maxlength="80" placeholder="Марка, модель, год"></label>
+      <label>Что беспокоит<textarea name="comment" maxlength="1000" placeholder="Например: горит check engine, троит на холостых"></textarea></label>
+      <div class="hp" aria-hidden="true"><label>Сайт<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <label class="consent"><input type="checkbox" name="consent" required><span>Согласен на обработку персональных данных для обратного звонка</span></label>
+      <div class="form-msg" id="form-msg" role="alert"></div>
+      <button class="btn" type="submit">Отправить заявку</button>
+      <div class="done">
+        <div class="ok">✓</div>
+        <h3>Заявка принята</h3>
+        <p id="done-text">Перезвоним в течение 15 минут в рабочее время.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>Pitline · автосервис</span>
+    <span>Демонстрационный сайт: компания, адрес и отзывы вымышлены.</span>
+  </div>
+</footer>
+
+<script>
+// Заявка идёт POST-ом на сервис бота, а уже он пишет в Telegram. Токен бота
+// в страницу не кладём: его вытащит любой, кто откроет исходный код.
+// Сервис принимает только домены из своего LEAD_ORIGINS, поэтому с диска
+// (file://) и с localhost форма честно скажет, что не отправилось.
+// Пусто = демо-режим, заявка никуда не уходит.
+const LEAD_ENDPOINT = 'https://watch-demo-shop.onrender.com/api/lead';
+// Автосервис вымышленный, а заявка настоящая: приходит разработчику сайта.
+// Посетителю-заказчику так и говорим - это и есть демонстрация.
+const DEMO_SENT = 'Заявка ушла. Сайт демонстрационный, поэтому она пришла не в автосервис, а разработчику в Telegram. На вашем сайте так же через секунду придёт вам.';
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rub = n => n.toLocaleString('ru-RU') + '\u00A0₽';
+
+/* монитор диагностики */
+const SYSTEMS = [
+  ['Двигатель', 'OK'],
+  ['Зажигание', 'P0302'],
+  ['Топливная система', 'OK'],
+  ['АКПП', 'OK'],
+  ['ABS / ESP', 'OK'],
+  ['Подушки безопасности', 'OK'],
+];
+const sysEl = document.getElementById('systems');
+const verdict = document.getElementById('verdict');
+const g = id => document.getElementById(id);
+
+function gauge(id, val, pct, warn) {
+  const el = g(id);
+  el.querySelector('span').textContent = val;
+  el.querySelector('.bar i').style.width = pct + '%';
+  el.classList.toggle('warn', !!warn);
+}
+
+let misfire = false;
+function tickGauges() {
+  // При пропусках зажигания обороты на холостых гуляют - это и видно на живом
+  // сканере, поэтому разброс зависит от того, нашли уже ошибку или нет.
+  const rpm = misfire ? 700 + Math.round(Math.random() * 160) : 770 + Math.round(Math.random() * 20);
+  gauge('g-rpm', rpm, rpm / 12, misfire);
+  const v = (14.1 + Math.random() * .2).toFixed(1);
+  gauge('g-volt', v, (v - 11) * 22);
+  gauge('g-temp', 88 + Math.round(Math.random() * 2), 74);
+  const f = misfire ? (6 + Math.random() * 3) : (2.8 + Math.random() * .6);
+  gauge('g-fuel', '+' + f.toFixed(1), f * 8, misfire);
+}
+
+function renderSystems(upto, scanning) {
+  sysEl.innerHTML = SYSTEMS.map(([name, res], i) => {
+    if (i < upto) {
+      const bad = res !== 'OK';
+      return `<li class="${bad ? 'bad' : 'ok'}"><span>${name}</span><span class="st">${bad ? res : 'OK'}</span></li>`;
+    }
+    if (i === upto && scanning) return `<li class="scan"><span>${name}</span><span class="st">скан…</span></li>`;
+    return `<li><span>${name}</span><span class="st">—</span></li>`;
+  }).join('');
+}
+
+const VERDICT = '<b>P0302</b> · пропуски зажигания, цилиндр 2<br>Вероятная причина: катушка зажигания. Ориентир ремонта: <span class="price">от 3&nbsp;400&nbsp;₽</span>';
+
+function runScan() {
+  let i = 0;
+  misfire = false;
+  verdict.classList.remove('on');
+  renderSystems(0, true);
+  const step = () => {
+    i++;
+    if (SYSTEMS[i - 1][1] !== 'OK') misfire = true;
+    if (i < SYSTEMS.length) {
+      renderSystems(i, true);
+      setTimeout(step, 750);
+    } else {
+      renderSystems(i, false);
+      verdict.innerHTML = VERDICT;
+      verdict.classList.add('on');
+      setTimeout(runScan, 6000);
+    }
+  };
+  setTimeout(step, 750);
+}
+
+if (reduced) {
+  misfire = true;
+  renderSystems(SYSTEMS.length, false);
+  verdict.innerHTML = VERDICT;
+  verdict.classList.add('on');
+  tickGauges();
+} else {
+  tickGauges();
+  setInterval(tickGauges, 900);
+  runScan();
+}
+
+/* калькулятор ТО */
+const CLASSES = [
+  { id: 'a', name: 'Малый класс', hint: 'Rio, Solaris, Polo', k: 1 },
+  { id: 'b', name: 'Седан, хэтчбек', hint: 'Octavia, Camry', k: 1.2 },
+  { id: 'c', name: 'Кроссовер', hint: 'Creta, RAV4, Tiguan', k: 1.4 },
+  { id: 'd', name: 'Премиум', hint: 'BMW, Mercedes, Audi', k: 1.9 },
+];
+// every - интервал в км; цена - работа + расходники для малого класса.
+const WORKS = [
+  { name: 'Масло и масляный фильтр', every: 15000, price: 2400 },
+  { name: 'Салонный фильтр', every: 15000, price: 900 },
+  { name: 'Осмотр подвески и тормозов', every: 15000, price: 0 },
+  { name: 'Воздушный фильтр', every: 30000, price: 800 },
+  { name: 'Тормозная жидкость', every: 45000, price: 1800 },
+  { name: 'Свечи зажигания', every: 60000, price: 2200 },
+  { name: 'Масло в АКПП', every: 60000, price: 4500 },
+  { name: 'Ремень ГРМ с роликами', every: 90000, price: 14000 },
+];
+
+let cls = CLASSES[1];
+const km = document.getElementById('km');
+const clsEl = document.getElementById('classes');
+clsEl.innerHTML = CLASSES.map(c =>
+  `<button type="button" data-id="${c.id}" aria-pressed="${c === cls}">${c.name}<small>${c.hint}</small></button>`).join('');
+clsEl.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  cls = CLASSES.find(c => c.id === b.dataset.id);
+  clsEl.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  calc();
+});
+
+let calcSummary = '';
+function calc() {
+  const v = +km.value;
+  const n = v / 15000;
+  km.style.setProperty('--p', ((v - 15000) / (180000 - 15000) * 100) + '%');
+  document.getElementById('km-out').textContent = v.toLocaleString('ru-RU') + ' км';
+  document.getElementById('to-out').textContent = 'ТО-' + n;
+  const list = WORKS.filter(w => v % w.every === 0);
+  // Округляем до сотни: смета «31 287 ₽» выглядит как калькулятор, а не как сервис.
+  const priced = list.map(w => ({ ...w, p: Math.round(w.price * cls.k / 100) * 100 }));
+  const total = priced.reduce((s, w) => s + w.p, 0);
+  document.getElementById('works').innerHTML = priced.map(w =>
+    `<li class="${w.p ? '' : 'free'}"><span>${w.name}</span><span>${w.p ? rub(w.p) : 'бесплатно'}</span></li>`).join('');
+  document.getElementById('total').textContent = rub(total);
+  document.getElementById('calc-cta').textContent = 'Записаться на ТО-' + n;
+  calcSummary = `ТО-${n} (${v.toLocaleString('ru-RU')} км), ${cls.name.toLowerCase()}, ориентир ${rub(total)}`;
+}
+km.addEventListener('input', calc);
+calc();
+
+document.getElementById('calc-cta').addEventListener('click', () => {
+  const t = document.querySelector('#lead textarea');
+  if (!t.value.trim() || t.dataset.auto) { t.value = calcSummary; t.dataset.auto = '1'; }
+});
+document.querySelector('#lead textarea').addEventListener('input', e => delete e.target.dataset.auto);
+
+/* форма заявки */
+const form = document.getElementById('lead');
+const msg = document.getElementById('form-msg');
+const phone = form.elements.phone;
+
+function phoneDigits(s) {
+  let d = s.replace(/\D/g, '');
+  if (d[0] === '8') d = '7' + d.slice(1);
+  if (d && d[0] !== '7') d = '7' + d;
+  return d.slice(0, 11);
+}
+phone.addEventListener('input', () => {
+  const d = phoneDigits(phone.value);
+  if (!d) { phone.value = ''; return; }
+  let out = '+7';
+  if (d.length > 1) out += ' (' + d.slice(1, 4);
+  if (d.length >= 4) out += ')';
+  if (d.length > 4) out += ' ' + d.slice(4, 7);
+  if (d.length > 7) out += '-' + d.slice(7, 9);
+  if (d.length > 9) out += '-' + d.slice(9, 11);
+  phone.value = out;
+});
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  form.querySelectorAll('.bad-input').forEach(x => x.classList.remove('bad-input'));
+  const name = form.elements.name.value.trim();
+  const digits = phoneDigits(phone.value);
+  let err = '';
+  if (!name) { form.elements.name.classList.add('bad-input'); err = 'Как к вам обращаться?'; }
+  if (digits.length !== 11) { phone.classList.add('bad-input'); err = err || 'Проверьте номер телефона'; }
+  if (!err && !form.elements.consent.checked) err = 'Нужно согласие на обработку данных';
+  msg.textContent = err;
+  if (err) return;
+  // Боты заполняют все поля подряд, включая невидимое - такую заявку молча
+  // «принимаем», чтобы не подсказывать, где ловушка.
+  if (form.elements.website.value) { form.classList.add('sent'); return; }
+
+  const data = { name, phone: '+' + digits, car: form.elements.car.value.trim(), comment: form.elements.comment.value.trim() };
+  const btn = form.querySelector('button[type=submit]');
+  if (!LEAD_ENDPOINT) {
+    document.getElementById('done-text').textContent =
+      'Это демо: заявка никуда не ушла. На рабочем сайте она через секунду приходит владельцу в Telegram.';
+    form.classList.add('sent');
+    return;
+  }
+  btn.disabled = true;
+  try {
+    const r = await fetch(LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (!r.ok) throw new Error(r.status);
+    if (DEMO_SENT) document.getElementById('done-text').textContent = DEMO_SENT;
+    form.classList.add('sent');
+  } catch {
+    msg.textContent = 'Не получилось отправить. Позвоните нам: +7 495 000-00-00';
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
