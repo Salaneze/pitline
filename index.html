@@ -4,17 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pitline — автосервис</title>
-<meta name="description" content="Автосервис Pitline: компьютерная диагностика, ТО по регламенту, ремонт двигателя и ходовой. Фотоотчёт по каждой детали в Telegram.">
+<meta name="description" content="Автосервис Pitline: компьютерная диагностика, ТО по регламенту, ремонт двигателя и ходовой. Смета с фото в Telegram до начала работ.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23B8FF3C'/%3E%3Crect x='12' y='8' width='8' height='16' rx='2' fill='%230A0B0D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tektur:wdth,wght@75..100,400..900&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
 <style>
 :root{
-  --bg:#0A0B0D; --surface:#111317; --surface2:#16191E;
+  --bg:#0A0B0D; --surface:#111317; --surface2:#16191E; --graphite:#1B1E24;
   --line:rgba(237,239,242,.09); --line2:rgba(237,239,242,.16);
   --text:#EDEFF2; --muted:#8E949D;
   --acc:#B8FF3C; --acc-dim:rgba(184,255,60,.12); --err:#FF5A4E;
+  --paper:#ECE7DB; --ink:#15161A; --ink-muted:#5E5A50; --stamp:#C2412D;
   --display:"Tektur",system-ui,sans-serif; --body:"Onest",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.2,.8,.2,1);
   --wrap:1200px;
@@ -35,14 +37,25 @@ h2{font-size:clamp(2rem,4.2vw,3.4rem);margin:20px 0 16px}
 .lead-in{color:var(--muted);max-width:60ch;font-size:18px}
 section{padding:128px 0;scroll-margin-top:68px}
 
+/* Проявление один раз и навсегда: повторный выезд при скролле назад мельтешит.
+   Прячем только под .js, чтобы без скрипта страница не осталась пустой. */
+.js [data-rv]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js [data-rv].in{opacity:1;transform:none}
+
 /* кнопки */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:12px;border:0;cursor:pointer;
+.btn{position:relative;overflow:hidden;isolation:isolate;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:12px;border:0;cursor:pointer;
   background:var(--acc);color:var(--bg);font:600 16px/1 var(--body);
-  box-shadow:0 0 0 1px rgba(184,255,60,.5),0 8px 32px -8px rgba(184,255,60,.55);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(184,255,60,.7),0 12px 40px -6px rgba(184,255,60,.7)}
+  box-shadow:0 0 0 1px rgba(184,255,60,.5),0 8px 32px -8px rgba(184,255,60,.55);transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .3s var(--ease)}
+/* Блик проходит по кнопке при наведении: кнопка «отзывается», а не просто меняет тень. */
+.btn::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);transform:translateX(-130%);transition:transform .7s var(--ease)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(184,255,60,.8),0 14px 44px -6px rgba(184,255,60,.75)}
+.btn:hover::after{transform:translateX(130%)}
 .btn:active{transform:translateY(0)}
 .btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
-.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--acc);color:var(--acc)}
+.btn.ghost::after{background:linear-gradient(105deg,transparent 30%,rgba(184,255,60,.18) 50%,transparent 70%)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--acc),0 0 28px -8px rgba(184,255,60,.6);color:var(--acc)}
+.btn.ink{background:var(--ink);color:var(--paper);box-shadow:0 10px 30px -12px rgba(0,0,0,.6)}
+.btn.ink:hover{background:#000;box-shadow:0 0 0 1px var(--ink),0 14px 36px -10px rgba(0,0,0,.7)}
 
 /* шапка */
 .nav{position:sticky;top:0;z-index:20;background:rgba(10,11,13,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
@@ -64,10 +77,10 @@ section{padding:128px 0;scroll-margin-top:68px}
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;
   -webkit-mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%);mask-image:radial-gradient(ellipse at 70% 30%,#000 10%,transparent 65%)}
 .hero .wrap{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center;position:relative;z-index:1}
-/* Потолок 4.8rem, а не больше: при 5.4 заголовок ломался на четыре строки
-   и доказательство у кнопки уезжало за первый экран ноутбука 1366x768. */
-.hero h1{font-size:clamp(2.7rem,6.2vw,4.8rem);margin:24px 0 24px}
-.hero h1 em{font-style:normal;color:var(--acc);text-shadow:0 0 28px rgba(184,255,60,.45)}
+/* Потолок 4.6rem: длиннее на 4.8 вторая фраза уходит в третью строку, и
+   доказательство у кнопки уезжает за первый экран ноутбука 1366x768. */
+.hero h1{font-size:clamp(2.6rem,5.6vw,4.6rem);margin:24px 0 24px}
+.hero h1 em{display:block;font-style:normal;color:var(--acc);text-shadow:0 0 28px rgba(184,255,60,.45)}
 .hero .lead-in{font-size:19px}
 /* Плашка над заголовком: стаж — первое, что проверяет человек, отдающий
    машину незнакомым. В герое она вместо обычного kicker. */
@@ -77,9 +90,8 @@ section{padding:128px 0;scroll-margin-top:68px}
 .trust b{color:var(--text);font-weight:600}
 .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:36px 0 48px}
 /* Доказательство прямо у кнопки, а не в отдельном блоке ниже: сомнение
-   возникает в момент нажатия, там его и закрываем. */
-/* Отдельной строкой: рядом с двумя кнопками в колонке героя не помещается
-   ни на одной ширине, а полупереносом выглядит как сломанная вёрстка. */
+   возникает в момент нажатия, там его и закрываем. Отдельной строкой: рядом
+   с двумя кнопками в колонке героя не помещается ни на одной ширине. */
 .proof{flex-basis:100%;display:flex;flex-direction:column;gap:4px;padding:2px 0 2px 16px;margin-top:4px;border-left:2px solid var(--acc)}
 .proof b{font:600 15px/1.2 var(--mono);color:var(--text)}
 .proof span{font-size:13px;line-height:1.3;color:var(--muted)}
@@ -119,25 +131,55 @@ section{padding:128px 0;scroll-margin-top:68px}
 .verdict b{color:var(--err)}
 .verdict .price{color:var(--acc)}
 
-/* услуги */
-.svc-list{margin-top:56px;border-top:1px solid var(--line)}
-.svc{display:grid;grid-template-columns:72px 1.1fr 1.4fr 160px;gap:24px;align-items:baseline;padding:28px 0;border-bottom:1px solid var(--line);transition:background .25s var(--ease)}
-.svc:hover{background:linear-gradient(90deg,var(--acc-dim),transparent 60%)}
-.svc .code{font:600 13px/1 var(--mono);color:var(--muted)}
+/* услуги: строка как слот прокачки в игре — подсветка сзади по краям и лёгкий
+   наклон к курсору. На телефоне то же по тапу, иначе hover просто не виден. */
+.svc-list{margin-top:56px;display:grid;gap:10px}
+.svc{--mx:50%;--my:50%;--tx:0px;--ty:0px;position:relative;display:grid;grid-template-columns:72px 1.1fr 1.4fr 160px;gap:24px;align-items:baseline;padding:28px 28px;
+  border:1px solid var(--line);border-radius:16px;background:var(--surface);cursor:pointer;
+  transform:translate(var(--tx),var(--ty));transition:transform .35s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)}
+.svc::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s var(--ease);
+  background:radial-gradient(420px circle at var(--mx) var(--my),rgba(184,255,60,.13),transparent 60%)}
+.svc:hover,.svc:focus-visible,.svc.on{border-color:rgba(184,255,60,.7);
+  box-shadow:0 0 0 1px rgba(184,255,60,.35),0 0 46px -10px rgba(184,255,60,.55),inset 0 0 22px -12px rgba(184,255,60,.6)}
+.svc:hover::before,.svc:focus-visible::before,.svc.on::before{opacity:1}
+.svc .code{font:600 13px/1 var(--mono);color:var(--muted);padding:6px 8px;border:1px solid var(--line2);border-radius:6px;justify-self:start;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.svc:hover .code,.svc.on .code{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 .svc h3{font-size:clamp(1.3rem,2vw,1.6rem);font-weight:700}
 .svc p{color:var(--muted);font-size:15px;line-height:1.55}
-.svc .price{font:600 18px/1.2 var(--mono);text-align:right;white-space:nowrap}
+.svc .price{font:600 18px/1.2 var(--mono);text-align:right;white-space:nowrap;transition:color .3s var(--ease)}
+.svc:hover .price,.svc.on .price{color:var(--acc)}
 .svc .price small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:4px}
 
-/* обещание + шаги */
-.promise{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.promise .wrap{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
-.steps{list-style:none;margin-top:40px}
-.step{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}
-.step span{font:600 14px/1.6 var(--mono);color:var(--acc)}
-.step b{display:block;font-weight:600;font-size:18px;margin-bottom:4px}
-.step p{color:var(--muted);font-size:15px;line-height:1.55}
-.chat{background:#0E1621;border:1px solid var(--line2);border-radius:20px;padding:20px;max-width:440px;justify-self:end;width:100%;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+/* Как работаем: четыре полосы разного цвета, у каждой гигантская цифра. Верхний
+   край следующей полосы косой и выпрямляется по мере скролла — цвет «наезжает»
+   на предыдущий. Скролл не захватываем: страница листается как обычно. */
+.how-head{padding-bottom:72px}
+/* Полосы прилипают под шапкой и наезжают одна на другую, как листы в стопке:
+   страница листается как обычно, просто следующий лист ложится сверху.
+   Накрытый лист уходит в тень и чуть сжимается (--cover из скролла). */
+.stage{--k:1;--cover:0;position:sticky;top:68px;height:calc(100vh - 68px);display:flex;align-items:center;overflow:hidden;
+  clip-path:polygon(0 calc(var(--k) * 90px),100% 0,100% 100%,0 100%)}
+.stage:first-of-type{clip-path:none}
+.stage::after{content:"";position:absolute;inset:0;background:#000;opacity:calc(var(--cover) * .45);pointer-events:none}
+.stage .wrap{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;
+  transform:scale(calc(1 - var(--cover) * .05)) translateY(calc(var(--cover) * -24px));transform-origin:50% 0}
+.s3 .chat{max-width:360px}
+.stage-no{font:600 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.stage h3{font-size:clamp(2.4rem,5.4vw,4.6rem);font-variation-settings:"wdth" 75;font-weight:900;text-transform:uppercase;line-height:.95;margin:18px 0 20px}
+.stage p{font-size:19px;line-height:1.55;max-width:44ch;opacity:.86}
+.stage-num{justify-self:end;text-align:right}
+.stage-num small{display:block;font:600 13px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;opacity:.8}
+.stage-num b{font:900 clamp(6rem,17vw,14rem)/.82 var(--display);font-variation-settings:"wdth" 75;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stage-num i{font:900 clamp(2rem,5vw,4rem)/1 var(--display);font-variation-settings:"wdth" 75;font-style:normal;margin-left:10px}
+.s1{background:var(--bg)}
+.s1 .stage-num b{color:var(--acc);text-shadow:0 0 50px rgba(184,255,60,.3)}
+.s2{background:var(--paper);color:var(--ink)}
+.s2 .stage-no{color:#7A6A4E;opacity:1}
+.s3{background:var(--acc);color:var(--bg)}
+.s4{background:var(--graphite)}
+.s4 .stage-num b{color:var(--acc)}
+.s3 .chat{justify-self:end}
+.chat{background:#0E1621;color:var(--text);border:1px solid rgba(10,11,13,.4);border-radius:20px;padding:20px;max-width:440px;width:100%;box-shadow:0 40px 80px -24px rgba(10,11,13,.65);transform:rotate(1.5deg)}
 .chat-top{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
 .ava{width:40px;height:40px;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:var(--bg);font:900 15px/1 var(--display)}
 .chat-top b{display:block;font-size:15px}
@@ -155,14 +197,27 @@ section{padding:128px 0;scroll-margin-top:68px}
 .chat-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .chat-btns span{text-align:center;padding:10px;border-radius:10px;background:#182533;font-size:14px;color:#6ab3f3}
 
-/* калькулятор */
-.calc{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line2);border-radius:20px;overflow:hidden;margin-top:56px}
-.calc > div{background:var(--surface);padding:36px}
+/* манифест: слова загораются по мере чтения, потом досчитываются цифры */
+.manifest{padding:160px 0 128px}
+.manifest p{font:800 clamp(1.9rem,4vw,3.5rem)/1.12 var(--display);font-variation-settings:"wdth" 78;text-transform:uppercase;letter-spacing:-.01em;max-width:24ch}
+.manifest .w{color:#3A3E46;transition:color .25s linear}
+.manifest .w.lit{color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:88px;border-top:1px solid var(--line)}
+.stats div{padding:32px 24px 0 0;border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font:900 clamp(3rem,6vw,5.2rem)/1 var(--display);font-variation-settings:"wdth" 75;font-variant-numeric:tabular-nums}
+.stats b.hot{color:var(--acc)}
+.stats span{display:block;margin-top:10px;color:var(--muted);font-size:15px;line-height:1.45;max-width:24ch}
+
+/* калькулятор + заказ-наряд */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;margin-top:56px}
+.calc-in{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:36px}
 .field-label{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:block}
 .seg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:36px}
-.seg button{min-height:52px;border-radius:10px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:15px;text-align:left;padding:10px 14px;line-height:1.3;transition:border-color .2s var(--ease),background .2s var(--ease)}
+.seg button{min-height:52px;border-radius:10px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:15px;text-align:left;padding:10px 14px;line-height:1.3;transition:border-color .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease)}
+.seg button:hover{border-color:rgba(184,255,60,.5)}
 .seg button small{display:block;color:var(--muted);font-size:12px}
-.seg button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-dim)}
+.seg button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-dim);box-shadow:0 0 24px -10px rgba(184,255,60,.7)}
 .km{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
 .km b{font:600 34px/1 var(--mono);font-variant-numeric:tabular-nums}
 .km span{font:600 14px/1 var(--mono);color:var(--acc);padding:6px 10px;border-radius:8px;background:var(--acc-dim)}
@@ -173,23 +228,55 @@ input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:v
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--acc);margin-top:-9px;box-shadow:0 0 16px rgba(184,255,60,.7)}
 input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:var(--acc);box-shadow:0 0 16px rgba(184,255,60,.7)}
 .ticks{display:flex;justify-content:space-between;font:400 12px/1 var(--mono);color:var(--muted)}
-.works{list-style:none;font-size:15px;min-height:280px}
-.works li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line)}
+/* Смета — распечатка того же сканера, что в герое: тёмная панель и моно,
+   а не бумажный чек. Бумага остаётся только у листов отзывов. */
+.order{position:relative;padding:32px;border-radius:20px;border:1px solid var(--line2);
+  background:linear-gradient(180deg,rgba(22,25,30,.95),rgba(14,16,19,.95));
+  box-shadow:0 0 0 1px rgba(184,255,60,.05),0 40px 80px -30px rgba(0,0,0,.8),0 0 60px -24px rgba(184,255,60,.22)}
+.order-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.order-head b{font:900 24px/1 var(--display);font-variation-settings:"wdth" 75;text-transform:uppercase}
+.order-head small{display:block;font:400 12px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.order-no{text-align:right;font:400 11px/1 var(--mono);letter-spacing:.12em;color:var(--muted)}
+.order-no b{display:block;font:600 16px/1 var(--mono);letter-spacing:.04em;color:var(--acc);margin-top:6px}
+.works{list-style:none;font-size:15px;min-height:250px;margin-top:6px}
+.works li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px dashed var(--line)}
 .works li span:last-child{font-family:var(--mono);white-space:nowrap}
 .works li.free span:last-child{color:var(--acc)}
-.total{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0}
-.total small{color:var(--muted);font-size:14px}
-.total b{font:600 36px/1 var(--mono);color:var(--acc);text-shadow:0 0 24px rgba(184,255,60,.35);font-variant-numeric:tabular-nums}
-.calc .note{color:var(--muted);font-size:13px;margin-top:14px;line-height:1.5}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 22px}
+.total small{color:var(--muted);font-size:14px;max-width:11ch;line-height:1.3}
+.total b{font:900 clamp(2.4rem,4vw,3.4rem)/1 var(--display);font-variation-settings:"wdth" 75;font-variant-numeric:tabular-nums;color:var(--acc);text-shadow:0 0 28px rgba(184,255,60,.35)}
+.order .stamp{border-color:var(--acc);color:var(--acc);mix-blend-mode:normal;box-shadow:0 0 22px -8px rgba(184,255,60,.7),inset 0 0 12px -6px rgba(184,255,60,.6)}
+.order .btn{width:100%}
+.order .note{color:var(--muted);font-size:13px;margin-top:14px;line-height:1.5}
+.total .stamp{margin-left:auto;margin-right:18px;align-self:center}
+.stamp{display:inline-block;white-space:nowrap;padding:8px 14px;border:3px solid var(--stamp);border-radius:8px;color:var(--stamp);
+  font:900 20px/1 var(--display);font-variation-settings:"wdth" 75;letter-spacing:.04em;text-transform:uppercase;transform:rotate(-9deg);opacity:.85;pointer-events:none;mix-blend-mode:multiply}
+.stamp.hit{animation:stamp .45s var(--ease)}
+@keyframes stamp{0%{opacity:0;transform:rotate(-9deg) scale(1.8)}60%{opacity:.95;transform:rotate(-9deg) scale(.94)}100%{opacity:.85;transform:rotate(-9deg) scale(1)}}
 
-/* отзывы */
-.revs{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px;margin-top:56px}
-.rev{border:1px solid var(--line);border-radius:16px;padding:28px;background:var(--surface);display:flex;flex-direction:column;gap:20px}
-.rev:first-child{background:linear-gradient(160deg,rgba(184,255,60,.08),var(--surface) 55%);border-color:rgba(184,255,60,.25)}
-.rev q{font-size:17px;line-height:1.6;quotes:none}
-.rev:first-child q{font-size:20px}
-.rev footer{margin-top:auto;font-size:14px;color:var(--muted)}
-.rev footer b{display:block;color:var(--text);font-weight:600}
+/* отзывы — записи из журнала выдачи в том же языке, что услуги и монитор:
+   тёмная карточка, моно-шапка, статус «проверено» как LIVE. Тащатся вбок. */
+.tickets{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:24px 24px 36px;margin:40px -24px 0;cursor:grab;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tickets::-webkit-scrollbar{display:none}
+.tickets.drag{cursor:grabbing;scroll-snap-type:none}
+.ticket{--mx:50%;--my:0%;position:relative;flex:0 0 min(400px,84vw);scroll-snap-align:start;padding:26px 26px 24px;display:flex;flex-direction:column;gap:20px;min-height:290px;user-select:none;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;transition:border-color .3s var(--ease),box-shadow .3s var(--ease),transform .35s var(--ease)}
+.ticket::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s var(--ease);
+  background:radial-gradient(360px circle at var(--mx) var(--my),rgba(184,255,60,.1),transparent 60%)}
+.ticket:hover{border-color:rgba(184,255,60,.55);transform:translateY(-4px);box-shadow:0 0 0 1px rgba(184,255,60,.25),0 0 40px -12px rgba(184,255,60,.5)}
+.ticket:hover::before{opacity:1}
+.ticket header{display:flex;justify-content:space-between;align-items:center;gap:12px;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--line)}
+.ticket q{font-size:17px;line-height:1.55;quotes:none}
+.ticket footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.ticket footer b{display:block;font:800 20px/1.1 var(--display);font-variation-settings:"wdth" 80}
+.ticket footer small{font:400 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ticket .stars{color:var(--acc);letter-spacing:2px;font-size:15px;white-space:nowrap}
+.ticket .stars s{text-decoration:none;color:var(--line2)}
+.ok-tag{display:flex;align-items:center;gap:7px;color:var(--acc);white-space:nowrap;opacity:0;transform:translateX(6px);transition:opacity .4s var(--ease) .2s,transform .4s var(--ease) .2s}
+.ok-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+.ticket.in .ok-tag{opacity:1;transform:none}
+.drag-hint{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.revs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
 
 /* вопросы */
 .faq{max-width:840px;margin-top:40px}
@@ -225,17 +312,42 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radiu
 .lead.sent > :not(.done){display:none}
 .lead.sent .done{display:block}
 
-footer.site{border-top:1px solid var(--line);padding:40px 0 56px;color:var(--muted);font-size:14px}
-footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+/* подвал: огромное имя и машинка, которая едет по линии вместе со скроллом */
+footer.site{border-top:1px solid var(--line);padding:56px 0 0;color:var(--muted);font-size:14px;overflow:hidden}
+footer.site .meta{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.road{position:relative;height:40px;margin-top:56px;border-bottom:1px solid var(--line2)}
+.road svg{position:absolute;bottom:-1px;left:0;width:64px;height:30px;transform:translateX(calc(var(--car,0) * (100vw - 112px)));transition:transform .15s linear;color:var(--acc)}
+.bigmark{font:900 clamp(5rem,24vw,22rem)/.8 var(--display);font-variation-settings:"wdth" 75;letter-spacing:-.02em;text-align:center;padding:24px 0 0;margin-bottom:-.12em;
+  background:linear-gradient(180deg,#8E949D,#26292F 85%);-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none}
+
+/* нижняя панель на телефоне: выезжает после первого экрана и больше не прячется */
+.dock{display:none}
+
+/* Узкий или низкий экран: полоса со сметой выше окна, прилипшая обрезалась бы.
+   Тут полосы идут подряд, косой край так же выпрямляется по скроллу. */
+@media (max-width:980px),(max-height:700px){
+  .stage{position:relative;top:auto;height:auto;display:block;padding:112px 0 calc(112px + 80px);margin-top:-80px}
+  .stage:first-of-type{margin-top:0}
+  .stage::after{display:none}
+  .stage .wrap{transform:none}
+}
 
 @media (max-width:980px){
-  .hero .wrap,.promise .wrap,.contact .wrap,.calc{grid-template-columns:1fr}
-  .chat{justify-self:start}
-  .revs{grid-template-columns:1fr}
+  .hero .wrap,.contact .wrap,.calc,.stage .wrap{grid-template-columns:1fr}
+  .stage .wrap{gap:40px}
+  .stage-num,.s3 .chat{justify-self:start;text-align:left}
+  .stats{grid-template-columns:1fr 1fr}
+  .stats div:nth-child(2){border-right:0}
   .svc{grid-template-columns:56px 1fr;gap:8px 16px}
   .svc p{grid-column:2}
   .svc .price{grid-column:2;text-align:left}
   .nav-links{display:none}
+  .dock{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;position:fixed;left:12px;right:12px;bottom:12px;z-index:30;padding:8px;border-radius:16px;
+    background:rgba(17,19,23,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line2);
+    transform:translateY(140%);transition:transform .45s var(--ease)}
+  .dock.on{transform:none}
+  .dock .btn{min-height:48px;font-size:15px;padding:0 12px}
+  footer.site{padding-bottom:84px}
 }
 @media (max-width:560px){
   body{font-size:16px}
@@ -245,15 +357,26 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
   .facts{grid-template-columns:1fr 1fr}
   .facts div:last-child{grid-column:1/-1}
   .phone{display:none}
-  .calc > div,.lead{padding:24px 18px}
+  .calc-in,.lead{padding:24px 18px}
+  .order{padding:28px 20px 24px}
+  .total{flex-wrap:wrap;row-gap:10px}
+  .total .stamp{order:3;margin:0;font-size:15px}
   .row2,.seg{grid-template-columns:1fr}
   .monitor{padding:16px}
   .gauge b{font-size:22px}
   .cta-row .btn{flex:1 1 100%}
+  .svc{padding:22px 18px}
+  .stage{padding:88px 0 calc(88px + 56px);margin-top:-56px;clip-path:polygon(0 calc(var(--k) * 56px),100% 0,100% 100%,0 100%)}
+  .stage p{font-size:17px}
+  .manifest{padding:112px 0 88px}
+  .stats div{padding:24px 12px 0 0}
+  .tickets{margin:40px -16px 0;padding:28px 16px 32px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   html{scroll-behavior:auto}
+  .js [data-rv]{opacity:1;transform:none}
+  .ok-tag{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -277,12 +400,12 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 
 <main id="top">
 
-<section class="hero">
+<section class="hero" id="hero">
   <div class="wrap">
     <div>
       <div class="trust"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 2.5 3.6v4c0 3.3 2.3 5.9 5.5 6.9 3.2-1 5.5-3.6 5.5-6.9v-4L8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m5.4 8 1.8 1.8 3.4-3.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>С 2014 года</b> · Москва, Нагатинская</span></div>
-      <h1>Сначала находим <em>причину</em>. Потом чиним.</h1>
-      <p class="lead-in">Не меняем детали «на всякий случай». Диагностика сканером и руками, смета до начала работ, фото и видео каждой снятой детали — вам в Telegram.</p>
+      <h1>Починим как надо. <em>Чаще всего — сегодня.</em></h1>
+      <p class="lead-in">Сканер, руки мастера и фото каждой снятой детали в Telegram. Смета приходит до начала работ, и сумма в кассе с ней совпадает.</p>
       <div class="cta-row">
         <a class="btn" href="#contact">Записаться на диагностику</a>
         <a class="btn ghost" href="#calc">Рассчитать ТО</a>
@@ -312,40 +435,70 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 <section id="services">
   <div class="wrap">
     <div class="kicker">Услуги и цены</div>
-    <h2>Цена называется до начала работ</h2>
-    <p class="lead-in">Ниже — цены за работу. Запчасти можно привезти свои или взять у нас: дадим два варианта, оригинал и проверенный аналог.</p>
-    <div class="svc-list">
-      <div class="svc"><span class="code">D-01</span><h3>Компьютерная диагностика</h3><p>Считываем ошибки всех блоков, смотрим живые параметры, проверяем руками то, что сканер не видит.</p><div class="price">1&nbsp;900&nbsp;₽<small>0&nbsp;₽ при ремонте</small></div></div>
-      <div class="svc"><span class="code">M-02</span><h3>ТО по регламенту</h3><p>Масло, фильтры, жидкости по пробегу и требованиям производителя. Отметка в сервисной книжке.</p><div class="price">от 2&nbsp;400&nbsp;₽<small>зависит от пробега</small></div></div>
-      <div class="svc"><span class="code">E-03</span><h3>Ремонт двигателя</h3><p>Пропуски зажигания, расход масла, ГРМ, течи. От замены катушки до капитального ремонта.</p><div class="price">от 3&nbsp;400&nbsp;₽</div></div>
-      <div class="svc"><span class="code">S-04</span><h3>Подвеска и тормоза</h3><p>Стуки, увод в сторону, вибрация при торможении. Колодки, диски, рычаги, стойки, развал-схождение.</p><div class="price">от 1&nbsp;500&nbsp;₽</div></div>
-      <div class="svc"><span class="code">T-05</span><h3>Коробка передач</h3><p>Замена масла в АКПП и вариаторе, адаптация, диагностика рывков и пробуксовки.</p><div class="price">от 4&nbsp;500&nbsp;₽</div></div>
-      <div class="svc"><span class="code">C-06</span><h3>Кондиционер</h3><p>Заправка, поиск утечки ультрафиолетом, антибактериальная обработка испарителя.</p><div class="price">от 2&nbsp;900&nbsp;₽</div></div>
+    <h2>Что чиним и почём</h2>
+    <p class="lead-in">Цены за работу. Запчасти можно привезти свои или взять у нас: дадим два варианта, оригинал и проверенный аналог.</p>
+    <div class="svc-list" id="svc-list">
+      <a class="svc" href="#contact" data-rv data-pick="Компьютерная диагностика"><span class="code">D-01</span><h3>Компьютерная диагностика</h3><p>Считываем ошибки всех блоков, смотрим живые параметры, проверяем руками то, что сканер не видит.</p><div class="price">1&nbsp;900&nbsp;₽<small>0&nbsp;₽ при ремонте</small></div></a>
+      <a class="svc" href="#calc" data-rv><span class="code">M-02</span><h3>ТО по регламенту</h3><p>Масло, фильтры, жидкости по пробегу и требованиям производителя. Отметка в сервисной книжке.</p><div class="price">от 2&nbsp;400&nbsp;₽<small>зависит от пробега</small></div></a>
+      <a class="svc" href="#contact" data-rv data-pick="Ремонт двигателя"><span class="code">E-03</span><h3>Ремонт двигателя</h3><p>Пропуски зажигания, расход масла, ГРМ, течи. От замены катушки до капитального ремонта.</p><div class="price">от 3&nbsp;400&nbsp;₽</div></a>
+      <a class="svc" href="#contact" data-rv data-pick="Подвеска и тормоза"><span class="code">S-04</span><h3>Подвеска и тормоза</h3><p>Стуки, увод в сторону, вибрация при торможении. Колодки, диски, рычаги, стойки, развал-схождение.</p><div class="price">от 1&nbsp;500&nbsp;₽</div></a>
+      <a class="svc" href="#contact" data-rv data-pick="Коробка передач"><span class="code">T-05</span><h3>Коробка передач</h3><p>Замена масла в АКПП и вариаторе, адаптация, диагностика рывков и пробуксовки.</p><div class="price">от 4&nbsp;500&nbsp;₽</div></a>
+      <a class="svc" href="#contact" data-rv data-pick="Кондиционер"><span class="code">C-06</span><h3>Кондиционер</h3><p>Заправка, поиск утечки ультрафиолетом, антибактериальная обработка испарителя.</p><div class="price">от 2&nbsp;900&nbsp;₽</div></a>
     </div>
   </div>
 </section>
 
-<section class="promise" id="how">
-  <div class="wrap">
-    <div>
-      <div class="kicker">Как работаем</div>
-      <h2>Ничего не меняем без вашего «да»</h2>
-      <ol class="steps">
-        <li class="step"><span>01</span><div><b>Заявка</b><p>Оставляете заявку на сайте или звоните. Перезваниваем за 15 минут и ставим время.</p></div></li>
-        <li class="step"><span>02</span><div><b>Диагностика</b><p>Мастер проверяет машину при вас или без вас — как удобнее.</p></div></li>
-        <li class="step"><span>03</span><div><b>Смета в Telegram</b><p>Фото проблемных деталей, цена работы и запчастей. Подтверждаете кнопкой.</p></div></li>
-        <li class="step"><span>04</span><div><b>Ремонт и выдача</b><p>Старые детали отдаём вам. Гарантия 12 месяцев, заказ-наряд на руки.</p></div></li>
-      </ol>
+<section id="how" style="padding-bottom:0">
+  <div class="wrap how-head">
+    <div class="kicker">Как работаем</div>
+    <h2>От звонка до ключей</h2>
+    <p class="lead-in">Четыре шага, у каждого понятный срок.</p>
+  </div>
+
+  <article class="stage s1">
+    <div class="wrap">
+      <div data-rv><span class="stage-no">Шаг 01 / 04</span><h3>Пишете или звоните</h3><p>Заявка на сайте или звонок. Перезванивает мастер-приёмщик, а не колл-центр, и сразу ставит время.</p></div>
+      <div class="stage-num" data-rv><small>перезвоним за</small><b data-count="15">15</b><i>мин</i></div>
     </div>
-    <div class="chat" aria-label="Пример сообщения со сметой в Telegram">
-      <div class="chat-top"><div class="ava">P</div><div><b>Pitline · сервис</b><small>бот · сейчас</small></div></div>
-      <div class="msg">Kia Rio, госномер …412. Нашли причину троения: пробита катушка зажигания 2-го цилиндра, свечи на пределе износа.</div>
-      <figure class="photo">
-        <img src="img/spark-plug.webp" width="880" height="657" loading="lazy" decoding="async" alt="Снятая свеча зажигания в руке механика, электрод в нагаре">
-        <span class="mark" aria-hidden="true"></span><span class="tag">износ 0,4&nbsp;мм</span>
-      </figure>
-      <div class="msg">Катушка + 4 свечи, работа и запчасти: <span class="sum">6&nbsp;850&nbsp;₽</span><br>Готово сегодня к 18:00.</div>
-      <div class="chat-btns"><span>Согласовать</span><span>Позвонить мастеру</span></div>
+  </article>
+  <article class="stage s2">
+    <div class="wrap">
+      <div data-rv><span class="stage-no">Шаг 02 / 04</span><h3>Ищем причину</h3><p>Сканер, щупы и руки. Показываем показания на экране, а не пересказываем их своими словами.</p></div>
+      <div class="stage-num" data-rv><small>диагностика</small><b data-count="40">40</b><i>мин</i></div>
+    </div>
+  </article>
+  <article class="stage s3">
+    <div class="wrap">
+      <div data-rv><span class="stage-no">Шаг 03 / 04</span><h3>Смета в Telegram</h3><p>Фото проблемных деталей, цена работы и запчастей. Подтверждаете одной кнопкой, звонить не нужно.</p></div>
+      <div class="chat" data-rv aria-label="Пример сообщения со сметой в Telegram">
+        <div class="chat-top"><div class="ava">P</div><div><b>Pitline · сервис</b><small>бот · сейчас</small></div></div>
+        <div class="msg">Kia Rio, госномер …412. Нашли причину троения: пробита катушка зажигания 2-го цилиндра, свечи на пределе износа.</div>
+        <figure class="photo">
+          <img src="img/spark-plug.webp" width="880" height="657" loading="lazy" decoding="async" alt="Снятая свеча зажигания в руке механика, электрод в нагаре">
+          <span class="mark" aria-hidden="true"></span><span class="tag">износ 0,4&nbsp;мм</span>
+        </figure>
+        <div class="msg">Катушка + 4 свечи, работа и запчасти: <span class="sum">6&nbsp;850&nbsp;₽</span><br>Готово сегодня к 18:00.</div>
+        <div class="chat-btns"><span>Согласовать</span><span>Позвонить мастеру</span></div>
+      </div>
+    </div>
+  </article>
+  <article class="stage s4">
+    <div class="wrap">
+      <div data-rv><span class="stage-no">Шаг 04 / 04</span><h3>Чиним и отдаём ключи</h3><p>Старые детали — в пакете на сиденье. Заказ-наряд на руки, на работу и запчасти гарантия.</p></div>
+      <div class="stage-num" data-rv><small>гарантия</small><b data-count="12">12</b><i>мес</i></div>
+    </div>
+  </article>
+</section>
+
+<section class="manifest" id="manifest">
+  <div class="wrap">
+    <div class="kicker">Почему к нам возвращаются</div>
+    <p id="manifest-text" style="margin-top:32px">Машина ломается не по расписанию. Поэтому у нас всё по порядку: причина на экране сканера, смета с фото в Telegram, ключ в руках мастера только после вашего «да». Сумма в кассе совпадает со сметой. Каждый раз.</p>
+    <div class="stats">
+      <div data-rv><b data-count="11400">11&nbsp;400</b><span>машин прошли через наши посты с 2014 года</span></div>
+      <div data-rv><b data-count="40">40</b><span>минут в среднем на диагностику</span></div>
+      <div data-rv><b data-count="4.9" data-dec="1">4,9</b><span>средняя оценка в журнале выдачи</span></div>
+      <div data-rv><b class="hot" data-count="0">0</b><span>работ без вашего согласования</span></div>
     </div>
   </div>
 </section>
@@ -354,35 +507,43 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
   <div class="wrap">
     <div class="kicker">Калькулятор</div>
     <h2>Сколько стоит ваше ТО</h2>
-    <p class="lead-in">Выберите класс машины и пробег — покажем работы по регламенту и ориентир по цене.</p>
+    <p class="lead-in">Выберите класс машины и пробег — заказ-наряд справа заполнится сам.</p>
     <div class="calc">
-      <div>
+      <div class="calc-in">
         <span class="field-label" id="cls-label">Класс автомобиля</span>
         <div class="seg" role="group" aria-labelledby="cls-label" id="classes"></div>
         <span class="field-label" id="km-label">Пробег</span>
-        <div class="km"><b id="km-out">60 000 км</b><span id="to-out">ТО-4</span></div>
+        <div class="km"><b id="km-out">60&nbsp;000 км</b><span id="to-out">ТО-4</span></div>
         <input type="range" id="km" min="15000" max="180000" step="15000" value="60000" aria-labelledby="km-label">
         <div class="ticks"><span>15 тыс.</span><span>90 тыс.</span><span>180 тыс.</span></div>
       </div>
-      <div>
-        <span class="field-label">Что входит</span>
+      <div class="order">
+        <div class="order-head">
+          <div><b>Предварительная смета</b><small id="order-sub">ТО-4 · седан, хэтчбек</small></div>
+          <div class="order-no">№<b id="order-no">ЗН-2431</b></div>
+        </div>
         <ul class="works" id="works" aria-live="polite"></ul>
-        <div class="total"><small>Ориентир, работа + расходники</small><b id="total">0 ₽</b></div>
-        <a class="btn" href="#contact" id="calc-cta" style="width:100%">Записаться на ТО-4</a>
+        <div class="total"><small>Работа + расходники</small><span class="stamp" id="stamp" aria-hidden="true">Без доплат</span><b id="total">0&nbsp;₽</b></div>
+        <a class="btn" href="#contact" id="calc-cta">Записаться на ТО-4</a>
         <p class="note">Точную цену назовём после осмотра: она зависит от двигателя и стоимости запчастей на день записи.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section>
+<section id="reviews">
   <div class="wrap">
     <div class="kicker">Отзывы</div>
-    <h2>Что говорят клиенты</h2>
-    <div class="revs">
-      <article class="rev"><q>В другом сервисе сказали менять коробку за 180 тысяч. Здесь нашли датчик за 3 400. Прислали фото, объяснили по-человечески. Езжу полгода — всё ровно.</q><footer><b>Андрей</b>Skoda Octavia, 2017</footer></article>
-      <article class="rev"><q>Оставила заявку вечером, утром уже стояла на подъёмнике. Смету согласовала из офиса одной кнопкой.</q><footer><b>Марина</b>Hyundai Creta, 2021</footer></article>
-      <article class="rev"><q>Вернули старые колодки в пакете. Мелочь, а доверия сразу больше.</q><footer><b>Илья</b>Toyota Camry, 2015</footer></article>
+    <div class="revs-head">
+      <h2>Из журнала выдачи</h2>
+      <span class="drag-hint" aria-hidden="true">← тяните · 5 листов →</span>
+    </div>
+    <div class="tickets" id="tickets" tabindex="0" aria-label="Отзывы клиентов, листаются вбок">
+      <article class="ticket"><header><span>ЗН-2411 · Коробка</span><span class="ok-tag">Проверено</span></header><q>В другом сервисе сказали менять коробку за 180 тысяч. Здесь нашли датчик за 3 400. Прислали фото, объяснили по-человечески. Езжу полгода — всё ровно.</q><footer><div><b>Андрей</b><small>Skoda Octavia · 2017</small></div><span class="stars" aria-label="5 из 5">★★★★★</span></footer></article>
+      <article class="ticket"><header><span>ЗН-2448 · Подвеска</span><span class="ok-tag">Проверено</span></header><q>Оставила заявку вечером, утром уже стояла на подъёмнике. Смету согласовала из офиса одной кнопкой.</q><footer><div><b>Марина</b><small>Hyundai Creta · 2021</small></div><span class="stars" aria-label="5 из 5">★★★★★</span></footer></article>
+      <article class="ticket"><header><span>ЗН-2485 · Тормоза</span><span class="ok-tag">Проверено</span></header><q>Вернули старые колодки в пакете. Мелочь, а доверия сразу больше.</q><footer><div><b>Илья</b><small>Toyota Camry · 2015</small></div><span class="stars" aria-label="5 из 5">★★★★★</span></footer></article>
+      <article class="ticket"><header><span>ЗН-2502 · Кондиционер</span><span class="ok-tag">Проверено</span></header><q>Дул тёплым всё лето. Утечку нашли ультрафиолетом за двадцать минут, показали трещину в трубке. Теперь холодный.</q><footer><div><b>Ольга</b><small>Kia Sportage · 2020</small></div><span class="stars" aria-label="5 из 5">★★★★★</span></footer></article>
+      <article class="ticket"><header><span>ЗН-2519 · ТО-4</span><span class="ok-tag">Проверено</span></header><q>Посчитал ТО на сайте, в кассе была ровно та же сумма. Первый раз такое.</q><footer><div><b>Тимур</b><small>VW Polo · 2018</small></div><span class="stars" aria-label="4 из 5">★★★★<s>★</s></span></footer></article>
     </div>
   </div>
 </section>
@@ -390,7 +551,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 <section id="faq">
   <div class="wrap">
     <div class="kicker">Вопросы</div>
-    <h2>Частые вопросы</h2>
+    <h2>Спрашивают до записи</h2>
     <div class="faq">
       <details><summary>Можно приехать со своими запчастями?</summary><p>Да. Гарантию на работу даём в любом случае, на сами детали — только если они куплены у нас.</p></details>
       <details><summary>Сохранится ли гарантия дилера?</summary><p>Да. Работаем по регламенту производителя, ставим запчасти с допуском и делаем отметку в сервисной книжке — по закону этого достаточно.</p></details>
@@ -435,12 +596,23 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 
 </main>
 
-<footer class="site">
+<footer class="site" id="foot">
   <div class="wrap">
-    <span>Pitline · автосервис</span>
-    <span>Демонстрационный сайт: компания, адрес, цифры и отзывы вымышлены.</span>
+    <div class="meta">
+      <span>Pitline · автосервис · Москва, Нагатинская</span>
+      <span>Демонстрационный сайт: компания, адрес, цифры и отзывы вымышлены.</span>
+    </div>
+    <div class="road" aria-hidden="true">
+      <svg viewBox="0 0 64 30"><path d="M4 22h4a5 5 0 0 1 10 0h22a5 5 0 0 1 10 0h8v-7l-6-2-7-7H18l-8 7-6 1.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="13" cy="23" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="45" cy="23" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    </div>
   </div>
+  <div class="bigmark" aria-hidden="true">PITLINE</div>
 </footer>
+
+<div class="dock" id="dock">
+  <a class="btn ghost" href="tel:+74950000000">Позвонить</a>
+  <a class="btn" href="#contact">Записаться</a>
+</div>
 
 <script>
 // Заявка идёт POST-ом на сервис бота, а уже он пишет в Telegram. Токен бота
@@ -454,7 +626,9 @@ const LEAD_ENDPOINT = 'https://watch-demo-shop.onrender.com/api/lead';
 const DEMO_SENT = 'Заявка ушла. Сайт демонстрационный, поэтому она пришла не в автосервис, а разработчику в Telegram. На вашем сайте так же через секунду придёт вам.';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const rub = n => n.toLocaleString('ru-RU') + '\u00A0₽';
+// Неразрывный пробел перед рублём, чтобы знак не отрывался на перенос строки.
+const NBSP = String.fromCharCode(160);
+const rub = n => n.toLocaleString('ru-RU') + NBSP + '₽';
 
 /* монитор диагностики */
 const SYSTEMS = [
@@ -535,6 +709,125 @@ if (reduced) {
   runScan();
 }
 
+/* счётчики: досчитывают до числа, когда попали в кадр */
+function countUp(el) {
+  const to = parseFloat(el.dataset.count), dec = +(el.dataset.dec || 0);
+  const fmt = v => dec ? v.toFixed(dec).replace('.', ',') : Math.round(v).toLocaleString('ru-RU');
+  if (reduced || !to) { el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 1100;
+  const tick = now => {
+    const p = Math.min(1, (now - t0) / dur);
+    el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* проявление и счётчики — один раз */
+if ('IntersectionObserver' in window && !reduced) {
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    e.target.querySelectorAll('[data-count]').forEach(countUp);
+    io.unobserve(e.target);
+  }), { threshold: .2, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('[data-rv], .ticket').forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll('[data-rv], .ticket').forEach(el => el.classList.add('in'));
+}
+
+/* услуги: подсветка идёт за курсором, строка чуть тянется к нему */
+document.querySelectorAll('.svc').forEach(row => {
+  row.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    const r = row.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    row.style.setProperty('--mx', x + 'px');
+    row.style.setProperty('--my', y + 'px');
+    if (!reduced) {
+      row.style.setProperty('--tx', ((x / r.width - .5) * 8).toFixed(1) + 'px');
+      row.style.setProperty('--ty', ((y / r.height - .5) * 4).toFixed(1) + 'px');
+    }
+  });
+  row.addEventListener('pointerleave', () => { row.style.setProperty('--tx', '0px'); row.style.setProperty('--ty', '0px'); });
+  // Выбранная услуга подставляется в заявку: человек не пишет то же самое второй раз.
+  row.addEventListener('click', () => {
+    document.querySelectorAll('.svc.on').forEach(x => x !== row && x.classList.remove('on'));
+    row.classList.add('on');
+    const t = document.querySelector('#lead textarea');
+    if (row.dataset.pick && (!t.value.trim() || t.dataset.auto)) { t.value = row.dataset.pick + ': '; t.dataset.auto = '1'; }
+  });
+});
+
+/* манифест: слова загораются по мере чтения */
+const mText = document.getElementById('manifest-text');
+mText.innerHTML = mText.textContent.trim().split(' ').filter(Boolean).map(w => `<span class="w">${w}</span>`).join(' ');
+const words = mText.querySelectorAll('.w');
+
+/* полосы «Как работаем», машинка в подвале, нижняя панель — всё от одного скролла */
+const allStages = [...document.querySelectorAll('.stage')];
+const stages = allStages.slice(1);
+const stacked = matchMedia('(min-width:981px) and (min-height:701px)');
+const foot = document.getElementById('foot');
+const dock = document.getElementById('dock');
+const hero = document.getElementById('hero');
+const clamp01 = v => Math.min(1, Math.max(0, v));
+let ticking = false;
+function onScroll() {
+  ticking = false;
+  const vh = innerHeight;
+  const tops = allStages.map(s => s.getBoundingClientRect().top);
+  if (stacked.matches) {
+    const h = vh - 68;
+    // Лист косой, пока въезжает снизу, и ровный, когда лёг под шапку.
+    stages.forEach((s, i) => s.style.setProperty('--k', clamp01((tops[i + 1] - 68) / (h * .6)).toFixed(3)));
+    // Нижний лист темнеет по мере того, как его накрывает следующий.
+    allStages.forEach((s, i) => s.style.setProperty('--cover',
+      i < allStages.length - 1 ? clamp01(1 - (tops[i + 1] - 68) / h).toFixed(3) : 0));
+  } else {
+    // 1 - полоса только показалась снизу, 0 - дошла до трети экрана
+    stages.forEach((s, i) => s.style.setProperty('--k', clamp01((tops[i + 1] - vh * .35) / (vh * .55)).toFixed(3)));
+  }
+  const mr = mText.getBoundingClientRect();
+  const mp = Math.min(1, Math.max(0, (vh * .85 - mr.top) / (mr.height + vh * .35)));
+  const lit = Math.round(mp * words.length);
+  words.forEach((w, i) => w.classList.toggle('lit', i < lit));
+  const fr = foot.getBoundingClientRect();
+  foot.style.setProperty('--car', Math.min(1, Math.max(0, (vh - fr.top) / fr.height)).toFixed(3));
+  if (hero.getBoundingClientRect().bottom < 0) dock.classList.add('on');
+}
+if (reduced) {
+  words.forEach(w => w.classList.add('lit'));
+  stages.forEach(s => s.style.setProperty('--k', 0));
+  addEventListener('scroll', () => { if (hero.getBoundingClientRect().bottom < 0) dock.classList.add('on'); }, { passive: true });
+} else {
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+}
+
+/* отзывы: тянуть мышью вбок, на телефоне листается пальцем само */
+const tickets = document.getElementById('tickets');
+tickets.querySelectorAll('.ticket').forEach(t => t.addEventListener('pointermove', e => {
+  const r = t.getBoundingClientRect();
+  t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+  t.style.setProperty('--my', (e.clientY - r.top) + 'px');
+}));
+let dragX = null, dragLeft = 0, moved = false;
+tickets.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'mouse') return;
+  dragX = e.clientX; dragLeft = tickets.scrollLeft; moved = false;
+  tickets.classList.add('drag');
+});
+addEventListener('pointermove', e => {
+  if (dragX === null) return;
+  const dx = e.clientX - dragX;
+  if (Math.abs(dx) > 3) moved = true;
+  tickets.scrollLeft = dragLeft - dx;
+});
+addEventListener('pointerup', () => { if (dragX === null) return; dragX = null; tickets.classList.remove('drag'); });
+tickets.addEventListener('click', e => { if (moved) e.preventDefault(); }, true);
+
 /* калькулятор ТО */
 const CLASSES = [
   { id: 'a', name: 'Малый класс', hint: 'Rio, Solaris, Polo', k: 1 },
@@ -557,6 +850,8 @@ const WORKS = [
 let cls = CLASSES[1];
 const km = document.getElementById('km');
 const clsEl = document.getElementById('classes');
+const totalEl = document.getElementById('total');
+const stamp = document.getElementById('stamp');
 clsEl.innerHTML = CLASSES.map(c =>
   `<button type="button" data-id="${c.id}" aria-pressed="${c === cls}">${c.name}<small>${c.hint}</small></button>`).join('');
 clsEl.addEventListener('click', e => {
@@ -567,6 +862,22 @@ clsEl.addEventListener('click', e => {
   calc();
 });
 
+// Сумма перещёлкивается от старой к новой, а не прыгает: видно, что именно
+// изменилось от сдвига пробега.
+let shown = 0, rollId = 0;
+function rollTotal(to) {
+  const from = shown, id = ++rollId, t0 = performance.now();
+  if (reduced) { shown = to; totalEl.textContent = rub(to); return; }
+  const tick = now => {
+    if (id !== rollId) return;
+    const p = Math.min(1, (now - t0) / 450);
+    shown = Math.round((from + (to - from) * (1 - Math.pow(1 - p, 3))) / 100) * 100;
+    totalEl.textContent = rub(p < 1 ? shown : to);
+    if (p < 1) requestAnimationFrame(tick); else shown = to;
+  };
+  requestAnimationFrame(tick);
+}
+
 let calcSummary = '';
 function calc() {
   const v = +km.value;
@@ -574,13 +885,16 @@ function calc() {
   km.style.setProperty('--p', ((v - 15000) / (180000 - 15000) * 100) + '%');
   document.getElementById('km-out').textContent = v.toLocaleString('ru-RU') + ' км';
   document.getElementById('to-out').textContent = 'ТО-' + n;
+  document.getElementById('order-sub').textContent = `ТО-${n} · ${cls.name.toLowerCase()}`;
+  document.getElementById('order-no').textContent = 'ЗН-' + (2400 + n * 7 + CLASSES.indexOf(cls));
   const list = WORKS.filter(w => v % w.every === 0);
   // Округляем до сотни: смета «31 287 ₽» выглядит как калькулятор, а не как сервис.
   const priced = list.map(w => ({ ...w, p: Math.round(w.price * cls.k / 100) * 100 }));
   const total = priced.reduce((s, w) => s + w.p, 0);
   document.getElementById('works').innerHTML = priced.map(w =>
     `<li class="${w.p ? '' : 'free'}"><span>${w.name}</span><span>${w.p ? rub(w.p) : 'бесплатно'}</span></li>`).join('');
-  document.getElementById('total').textContent = rub(total);
+  rollTotal(total);
+  stamp.classList.remove('hit'); void stamp.offsetWidth; stamp.classList.add('hit');
   document.getElementById('calc-cta').textContent = 'Записаться на ТО-' + n;
   calcSummary = `ТО-${n} (${v.toLocaleString('ru-RU')} км), ${cls.name.toLowerCase()}, ориентир ${rub(total)}`;
 }
@@ -599,7 +913,7 @@ const msg = document.getElementById('form-msg');
 const phone = form.elements.phone;
 
 function phoneDigits(s) {
-  let d = s.replace(/\D/g, '');
+  let d = s.replace(/[^0-9]/g, '');
   if (d[0] === '8') d = '7' + d.slice(1);
   if (d && d[0] !== '7') d = '7' + d;
   return d.slice(0, 11);
