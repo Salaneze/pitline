@@ -565,8 +565,8 @@ footer.site .meta{display:flex;justify-content:space-between;gap:24px;flex-wrap:
   <div class="wrap">
     <div>
       <div class="kicker">Запись</div>
-      <h2>Оставьте заявку — перезвоним за 15 минут</h2>
-      <p class="lead-in">Опишите, что беспокоит. Если не знаете, как назвать, — напишите как есть: «стучит справа на кочках» нам понятнее любого термина.</p>
+      <h2>Попробуйте форму заявки</h2>
+      <p class="lead-in">Это демонстрационный сайт вымышленного автосервиса. Заявка действительно отправится разработчику; используйте вымышленные данные. Обратного звонка не будет.</p>
       <div class="addr">
         <div><small>Адрес</small><b>Москва, Нагатинская ул., 00, бокс 4</b></div>
         <div><small>Часы работы</small><b>Ежедневно, 9:00-21:00</b></div>
@@ -574,7 +574,7 @@ footer.site .meta{display:flex;justify-content:space-between;gap:24px;flex-wrap:
       </div>
     </div>
 
-    <form class="lead" id="lead" novalidate>
+    <form class="lead" id="lead" method="post" novalidate>
       <div class="row2">
         <label>Имя<input type="text" name="name" autocomplete="given-name" maxlength="60" required></label>
         <label>Телефон<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required></label>
@@ -582,13 +582,14 @@ footer.site .meta{display:flex;justify-content:space-between;gap:24px;flex-wrap:
       <label>Автомобиль<input type="text" name="car" maxlength="80" placeholder="Марка, модель, год"></label>
       <label>Что беспокоит<textarea name="comment" maxlength="1000" placeholder="Например: горит check engine, троит на холостых"></textarea></label>
       <div class="hp" aria-hidden="true"><label>Сайт<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-      <label class="consent"><input type="checkbox" name="consent" required><span>Согласен на обработку персональных данных для обратного звонка</span></label>
+      <label class="consent"><input type="checkbox" name="consent" required><span>Согласен на обработку введённых данных для демонстрации формы</span></label>
       <div class="form-msg" id="form-msg" role="alert"></div>
-      <button class="btn" type="submit">Отправить заявку</button>
+      <noscript><p>Для отправки формы необходимо включить JavaScript.</p></noscript>
+      <button class="btn" type="submit" disabled>Отправить заявку</button>
       <div class="done">
         <div class="ok">✓</div>
         <h3>Заявка принята</h3>
-        <p id="done-text">Перезвоним в течение 15 минут в рабочее время.</p>
+        <p id="done-text">Демонстрационная заявка сохранена. Обратного звонка не будет.</p>
       </div>
     </form>
   </div>
@@ -615,15 +616,7 @@ footer.site .meta{display:flex;justify-content:space-between;gap:24px;flex-wrap:
 </div>
 
 <script>
-// Заявка идёт POST-ом на сервис бота, а уже он пишет в Telegram. Токен бота
-// в страницу не кладём: его вытащит любой, кто откроет исходный код.
-// Сервис принимает только домены из своего LEAD_ORIGINS, поэтому с диска
-// (file://) и с localhost форма честно скажет, что не отправилось.
-// Пусто = демо-режим, заявка никуда не уходит.
-const LEAD_ENDPOINT = 'https://watch-demo-shop.onrender.com/api/lead';
-// Автосервис вымышленный, а заявка настоящая: приходит разработчику сайта.
-// Посетителю-заказчику так и говорим - это и есть демонстрация.
-const DEMO_SENT = 'Заявка ушла. Сайт демонстрационный, поэтому она пришла не в автосервис, а разработчику в Telegram. На вашем сайте так же через секунду придёт вам.';
+const LEAD_ENDPOINT = 'https://watch-demo-shop.onrender.com/api/forms/pitline';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Неразрывный пробел перед рублём, чтобы знак не отрывался на перенос строки.
@@ -930,8 +923,15 @@ phone.addEventListener('input', () => {
   phone.value = out;
 });
 
+const submitButton = form.querySelector('button[type=submit]');
+submitButton.disabled = false;
+let pendingPayload = null;
+let pendingKey = null;
+let submitting = false;
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  if (submitting) return;
   form.querySelectorAll('.bad-input').forEach(x => x.classList.remove('bad-input'));
   const name = form.elements.name.value.trim();
   const digits = phoneDigits(phone.value);
@@ -941,28 +941,31 @@ form.addEventListener('submit', async e => {
   if (!err && !form.elements.consent.checked) err = 'Нужно согласие на обработку данных';
   msg.textContent = err;
   if (err) return;
-  // Боты заполняют все поля подряд, включая невидимое - такую заявку молча
-  // «принимаем», чтобы не подсказывать, где ловушка.
-  if (form.elements.website.value) { form.classList.add('sent'); return; }
 
-  const data = { name, phone: '+' + digits, car: form.elements.car.value.trim(), comment: form.elements.comment.value.trim() };
-  const btn = form.querySelector('button[type=submit]');
-  if (!LEAD_ENDPOINT) {
-    document.getElementById('done-text').textContent =
-      'Это демо: заявка никуда не ушла. На рабочем сайте она через секунду приходит владельцу в Telegram.';
-    form.classList.add('sent');
-    return;
+  const data = { name, phone: '+' + digits, car: form.elements.car.value.trim(), comment: form.elements.comment.value.trim(), consent: form.elements.consent.checked, website: form.elements.website.value };
+  const payload = JSON.stringify(data);
+  if (payload !== pendingPayload) {
+    pendingPayload = payload;
+    pendingKey = crypto.randomUUID();
   }
-  btn.disabled = true;
+  submitting = true;
+  submitButton.disabled = true;
   try {
-    const r = await fetch(LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!r.ok) throw new Error(r.status);
-    if (DEMO_SENT) document.getElementById('done-text').textContent = DEMO_SENT;
-    form.classList.add('sent');
+    const r = await fetch(LEAD_ENDPOINT, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': pendingKey }, body: payload });
+    if (r.status === 200 || r.status === 201) {
+      form.classList.add('sent');
+    } else if (r.status === 409) {
+      msg.textContent = 'Не удалось повторить заявку из-за конфликта. Измените данные и отправьте снова.';
+    } else if (r.status === 429) {
+      msg.textContent = 'Слишком много попыток. Попробуйте позже.';
+    } else {
+      msg.textContent = 'Не удалось отправить заявку. Попробуйте ещё раз.';
+    }
   } catch {
-    msg.textContent = 'Не получилось отправить. Позвоните нам: +7 495 000-00-00';
+    msg.textContent = 'Нет ответа от сервера. Попробуйте ещё раз: повторная отправка тех же данных не создаст новую заявку.';
   } finally {
-    btn.disabled = false;
+    submitting = false;
+    submitButton.disabled = false;
   }
 });
 </script>
